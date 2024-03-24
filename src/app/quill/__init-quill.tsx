@@ -1,6 +1,6 @@
 "use client";
 
-import { MutableRefObject, useEffect, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { ChildrenProps } from "@/app/types";
 import { QuillContext } from "@/app/quill/context";
 
@@ -30,21 +30,21 @@ export default function __InitQuill(
 ) {
   const [quill, setQuill] = useState(null as Quill | null);
   useEffect(() => {
+    // Guard begin.
+    if (quill != null) return;
+
     const currentRef = props.editorRef.current;
     if (!currentRef) return;
 
     const toolbarRef = props.toolbarRef.current;
     if (!toolbarRef) return;
 
+    // Guard end. Create Quill instance.
+
     Quill.register(register_options);
 
     const toolbarOptions: ToolbarProps = {
       container: toolbarRef,
-      handlers: {
-        bold: function (value: boolean) {
-          console.log(value)
-        }
-      }
     };
 
     const options: ConstructorParameters<typeof Quill>[1] = {
@@ -52,8 +52,8 @@ export default function __InitQuill(
       modules: { toolbar: toolbarOptions },
     };
 
-    const quill = new Quill(currentRef, { ...options, ...props.options });
-    setQuill(quill);
+    const _quill = new Quill(currentRef, { ...options, ...props.options });
+    setQuill(_quill);
 
     console.debug("Init Quill.");
 
