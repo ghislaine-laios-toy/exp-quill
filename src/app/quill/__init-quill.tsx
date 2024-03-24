@@ -12,6 +12,7 @@ import Snow from "quill/themes/snow";
 import Bold from "quill/formats/bold";
 import Italic from "quill/formats/italic";
 import Header from "quill/formats/header";
+import { FontClass } from "quill/formats/font";
 
 const register_options: Parameters<typeof Quill.register>[0] = {
   "modules/toolbar": Toolbar,
@@ -19,6 +20,7 @@ const register_options: Parameters<typeof Quill.register>[0] = {
   "formats/bold": Bold,
   "formats/italic": Italic,
   "formats/header": Header,
+  "formats/font": FontClass,
 };
 
 export default function __InitQuill(
@@ -29,9 +31,10 @@ export default function __InitQuill(
   } & ChildrenProps,
 ) {
   const [quill, setQuill] = useState(null as Quill | null);
+  const hasMounted = useRef(false);
   useEffect(() => {
     // Guard begin.
-    if (quill != null) return;
+    if (hasMounted.current) return;
 
     const currentRef = props.editorRef.current;
     if (!currentRef) return;
@@ -50,11 +53,13 @@ export default function __InitQuill(
     const options: ConstructorParameters<typeof Quill>[1] = {
       theme: "snow",
       modules: { toolbar: toolbarOptions },
+
     };
 
     const _quill = new Quill(currentRef, { ...options, ...props.options });
     setQuill(_quill);
 
+    hasMounted.current = true;
     console.debug("Init Quill.");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
